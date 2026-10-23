@@ -1,0 +1,103 @@
+/* Cores e base comuns a todas as telas. */
+
+:root {
+  color-scheme: light dark;
+
+  --accent: #1D9E75;
+  --accent-light: #9FE1CB;
+  --accent-dark: #0F6E56;
+  --danger: #D2463C;
+  --danger-soft: #FBE7E5;
+
+  --bg: #FFFFFF;
+  --surface: #F7F8F7;
+  --text: #1C2421;
+  --muted: #66716D;
+  --border: #E3E7E5;
+  --track: #EBEFED;
+  --accent-soft: #E8F6F0;
+  --accent-text: var(--accent-dark);
+
+  --radius: 10px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141917;
+    --surface: #1B211F;
+    --text: #E6ECE9;
+    --muted: #93A09B;
+    --border: #2B3330;
+    --track: #27302D;
+    --accent-soft: #17352B;
+    --accent-text: var(--accent-light);
+    --danger: #F07167;
+    --danger-soft: #3A1F1D;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 7px 14px;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+button:hover { background: var(--surface); }
+button:focus-visible, input:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+button:disabled { cursor: default; opacity: 0.5; }
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #FFFFFF;
+}
+button.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+input {
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+
+.muted { color: var(--muted); }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Inicial do site, no lugar do favicon (que exigiria outra permissão). */
+.monogram {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}

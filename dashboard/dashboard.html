@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ampulheta · Resumo da semana</title>
+  <link rel="icon" href="../icons/icon32.png">
+  <link rel="stylesheet" href="../shared/theme.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-head">
+      <div class="title">
+        <img src="../icons/icon48.png" alt="" width="32" height="32">
+        <div>
+          <h1>Resumo da semana</h1>
+          <p id="range" class="muted"></p>
+        </div>
+      </div>
+      <nav class="week-nav" aria-label="Trocar semana">
+        <button id="prev-week" aria-label="Semana anterior">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button id="this-week">Esta semana</button>
+        <button id="next-week" aria-label="Próxima semana">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <p id="demo-note" class="demo-note" hidden>Dados de exemplo, só para visualização. Nada foi gravado.</p>
+
+    <section class="stats" aria-label="Números da semana">
+      <div class="stat">
+        <span class="stat-label">Tempo total</span>
+        <strong id="stat-total" class="stat-value tabular">—</strong>
+        <span id="stat-total-sub" class="stat-sub muted"></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Comparado à semana anterior</span>
+        <strong id="stat-compare" class="stat-value tabular">—</strong>
+        <span id="stat-compare-sub" class="stat-sub muted"></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Limites respeitados</span>
+        <strong id="stat-respected" class="stat-value tabular">—</strong>
+        <span id="stat-respected-sub" class="stat-sub muted"></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Por dia</h2>
+        <span id="days-legend" class="legend muted" hidden><i class="dot-over" aria-hidden="true"></i>limite atingido</span>
+      </div>
+      <div id="day-chart" class="day-chart" role="img"></div>
+      <details class="table-view">
+        <summary>Ver como tabela</summary>
+        <table id="day-table">
+          <thead><tr><th scope="col">Dia</th><th scope="col">Tempo</th><th scope="col">Limites</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </details>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Sites mais usados</h2>
+        <span id="sites-count" class="muted"></span>
+      </div>
+      <ol id="ranking" class="ranking"></ol>
+      <p id="ranking-empty" class="muted empty" hidden>Nenhum tempo registrado nesta semana.</p>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>

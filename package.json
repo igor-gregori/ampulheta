@@ -1,0 +1,9 @@
+{
+  "name": "ampulheta",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "icons": "python3 tools/make_icons.py"
+  }
+}
