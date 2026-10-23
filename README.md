@@ -1,5 +1,7 @@
 # Ampulheta
 
+![Popup com o anel de progresso e o resumo da semana](docs/hero.png)
+
 Extensão para Google Chrome (Manifest V3) que limita o tempo em sites escolhidos, principalmente o YouTube, e todo sábado mostra um resumo dos sites onde seu tempo foi parar.
 
 Tudo fica no seu navegador (`chrome.storage.local`). Não há servidor, conta ou coleta de dados.
@@ -12,7 +14,19 @@ Tudo fica no seu navegador (`chrome.storage.local`). Não há servidor, conta ou
 - **Resumo semanal** (sábado a sexta): tempo total, comparação com a semana anterior, dias em que os limites foram respeitados, ranking dos sites e gráfico por dia. A notificação chega no sábado às 9h e o resumo também abre pelo popup.
 - Tema claro e escuro automático. Histórico com mais de 90 dias é apagado sozinho.
 
+| Tela de bloqueio | Sites e limites |
+| --- | --- |
+| ![Tela de bloqueio com o botão "Mais 5 min"](store/screenshot-3.jpg) | ![Cadastro de sites e limites](store/screenshot-4.jpg) |
+
+![Resumo da semana e popup no tema escuro](store/screenshot-5.jpg)
+
 ## Instalar
+
+### Pela Chrome Web Store
+
+Em breve.
+
+### Sem compactação (desenvolvimento)
 
 1. Baixe ou clone este repositório.
 2. Abra `chrome://extensions` e ative o **Modo do desenvolvedor**.
@@ -42,9 +56,22 @@ shared/storage.js    leitura e gravação no chrome.storage.local
 shared/theme.css     cores e base comuns
 icons/               ícone (icon.svg) e PNGs gerados por tools/make_icons.py
 tests/               testes do background com Node
+store/               imagens e textos da página na Chrome Web Store
 ```
 
 HTML, CSS e JavaScript puros com ES modules, sem build e sem dependências.
+
+## Publicar uma nova versão
+
+1. Aumente `version` no `manifest.json`.
+2. Gere o pacote com `npm run package`. O arquivo sai em `dist/ampulheta-<versão>.zip`, só com os arquivos da extensão.
+3. No [painel do desenvolvedor](https://chrome.google.com/webstore/devconsole), abra a Ampulheta, envie o novo pacote em *Pacote* e clique em *Enviar para revisão*.
+
+Os textos da página da loja estão em [`store/LISTING.md`](store/LISTING.md).
+
+## Privacidade
+
+A Ampulheta não envia nada para fora do navegador. Veja a [política de privacidade](PRIVACY.md).
 
 ## Licença
 

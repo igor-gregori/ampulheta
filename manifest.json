@@ -3,6 +3,7 @@
   "name": "Ampulheta",
   "version": "1.0.0",
   "description": "Limita o tempo em sites escolhidos e mostra um resumo semanal todo sábado.",
+  "homepage_url": "https://github.com/igor-gregori/ampulheta",
   "permissions": ["tabs", "storage", "idle", "alarms", "notifications"],
   "background": {
     "service_worker": "background.js",
