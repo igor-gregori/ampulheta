@@ -51,7 +51,7 @@ ampulheta/
 - Tema claro, escuro ou do sistema, escolhido no botão do topo, com cores definidas como variáveis CSS em `:root` e `.dark`.
 - Popup: o anel de progresso do site atual é o elemento central ("38 min de 60 hoje").
 - Tela de bloqueio: tom gentil, com uma frase curta, o tempo usado e os botões de mais tempo.
-- Ícone: letra A branca sobre um quadrado preto, com um monte de areia âmbar.
+- Ícone: ampulheta de traços brancos finos sobre um quadrado preto, com um triângulo de areia âmbar em cima e outro embaixo.
 
 ## Etapas
 1. **Esqueleto:** `manifest.json` e contagem de tempo no `background.js`. Validar pelo console do service worker.
