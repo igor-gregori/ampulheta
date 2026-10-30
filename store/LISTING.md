@@ -26,6 +26,10 @@ LIMITES DIÁRIOS
 • Quando o limite acaba, o site fica pausado até o dia seguinte. Se precisar mesmo, dá para pedir mais 5 ou 10 minutos uma vez por dia, com uma mensagem sua para pensar duas vezes antes.
 • Subdomínios contam juntos: www.youtube.com, m.youtube.com e music.youtube.com entram na conta do youtube.com.
 
+SEMPRE À VISTA
+• O ícone da extensão mostra quanto tempo você já passou no site aberto e muda de cor quando faltam 5 minutos.
+• Cada site aparece com o próprio ícone, e você escolhe o tema claro, escuro ou o do sistema.
+
 CONTAGEM JUSTA
 • Conta só quando a aba está aberta na frente, a janela do Chrome está em foco e você está no computador.
 • Vídeo tocando continua contando, mesmo sem mexer no mouse.
@@ -36,7 +40,7 @@ Todo sábado de manhã chega o seu resumo:
 • comparação com a semana anterior;
 • em quantos dias você respeitou os limites;
 • todos os sites onde você passou tempo, do mais usado ao menos usado;
-• gráfico por dia da semana, dividido por site.
+• gráfico por dia da semana, dividido por site: clique em um dia para ver só os sites dele.
 O resumo também abre a qualquer momento pelo botão da extensão.
 
 PRIVACIDADE
@@ -53,7 +57,7 @@ Código aberto: https://github.com/igor-gregori/ampulheta
 
 | Campo | Arquivo |
 | --- | --- |
-| Ícone da loja (128×128) | `icons/icon128.png` |
+| Ícone da loja (128×128) | `public/icons/icon128.png` |
 | Capturas de tela (1280×800) | `store/screenshot-1.jpg` a `store/screenshot-5.jpg`, nessa ordem |
 | Bloco promocional pequeno (440×280) | `store/promo-small-440x280.jpg` |
 | Bloco promocional de destaque (1400×560) | `store/promo-marquee-1400x560.jpg` |

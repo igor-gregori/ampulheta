@@ -1,6 +1,6 @@
 # Ampulheta
 
-![Popup com o anel de progresso e o resumo da semana](docs/hero.png)
+![Ampulheta: seu tempo sob controle](docs/hero.png)
 
 Extensão para Google Chrome (Manifest V3) que limita o tempo em sites escolhidos, principalmente o YouTube, e todo sábado mostra um resumo dos sites onde seu tempo foi parar.
 
