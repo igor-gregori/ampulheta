@@ -12,7 +12,7 @@ Envie `dist/ampulheta-<versão>.zip` (gerado por `npm run package`).
 
 **Resumo** (vem do manifest, até 132 caracteres):
 
-> Limita o tempo em sites escolhidos e mostra um resumo semanal todo sábado.
+> Limita o tempo em sites escolhidos, com limites por dia da semana, e mostra um resumo semanal todo sábado.
 
 **Descrição:**
 
@@ -21,6 +21,7 @@ Passou "só um minutinho" no YouTube e já foi uma hora? A Ampulheta ajuda você
 
 LIMITES DIÁRIOS
 • Escolha um limite em minutos para cada site. O YouTube já vem com 60 minutos.
+• Dê mais ou menos tempo em dias específicos, como no sábado e no domingo.
 • Um aviso chega quando faltam 5 minutos.
 • Quando o limite acaba, o site fica pausado até o dia seguinte. Se precisar mesmo, o botão "Mais 5 min" pode ser usado uma vez por dia.
 • Subdomínios contam juntos: www.youtube.com, m.youtube.com e music.youtube.com entram na conta do youtube.com.
@@ -34,8 +35,8 @@ Todo sábado de manhã chega o seu resumo:
 • tempo total da semana;
 • comparação com a semana anterior;
 • em quantos dias você respeitou os limites;
-• ranking dos sites onde você mais passou tempo;
-• gráfico por dia da semana.
+• todos os sites onde você passou tempo, do mais usado ao menos usado;
+• gráfico por dia da semana, dividido por site.
 O resumo também abre a qualquer momento pelo botão da extensão.
 
 PRIVACIDADE

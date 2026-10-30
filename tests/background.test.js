@@ -188,6 +188,19 @@ test('divide o tempo na meia-noite', async () => {
   assert.equal(usage['2026-10-22']['github.com'], 30);
 });
 
+test('limite do dia da semana vale no lugar do limite padrão', async () => {
+  // Agora é quinta-feira (4), logo depois da meia-noite.
+  await store.setLimit('github.com', 1);
+  await store.setDayLimit('github.com', 4, 10);
+  await settle();
+  await run(120);
+  assert.equal(chrome.env.tabs[0].url, 'https://github.com/', 'quinta tem 10 min');
+
+  await store.setDayLimit('github.com', 4, null);
+  await settle();
+  assert.match(chrome.env.tabs[0].url, /blocked\.html\?site=github\.com/, 'sem o dia, volta a 1 min');
+});
+
 test('alarme de sábado mostra a notificação e reagenda', async () => {
   await chrome.alarms.onAlarm.fire({ name: 'weekly-summary' });
   await settle();

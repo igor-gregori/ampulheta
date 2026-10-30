@@ -1,4 +1,4 @@
-"""Gera icons/icon{16,32,48,128}.png a partir das formas de icons/icon.svg.
+"""Gera public/icons/icon{16,32,48,128}.png a partir das formas de public/icons/icon.svg.
 
 Só usa a biblioteca padrão. Rode com: python3 tools/make_icons.py
 """
@@ -6,18 +6,18 @@ import struct
 import zlib
 from pathlib import Path
 
-DARK = (0x0F, 0x6E, 0x56)
-MAIN = (0x1D, 0x9E, 0x75)
+BLACK = (0x0A, 0x0A, 0x0A)
 WHITE = (0xFF, 0xFF, 0xFF)
 
 # Mesmas formas do icon.svg, num quadro de 128 x 128.
 SHAPES = [
-    ("rect", (26, 12, 76, 13, 6.5), DARK),
-    ("rect", (26, 103, 76, 13, 6.5), DARK),
-    ("poly", [(35, 25), (93, 25), (93, 38), (71, 64), (93, 90), (93, 103),
-              (35, 103), (35, 90), (57, 64), (35, 38)], MAIN),
-    ("poly", [(47, 40), (81, 40), (64, 59)], WHITE),
-    ("poly", [(43, 99), (85, 99), (64, 79)], WHITE),
+    ("rect", (0, 0, 128, 128, 26), BLACK),
+    ("rect", (30, 18, 68, 11, 5.5), WHITE),
+    ("rect", (30, 99, 68, 11, 5.5), WHITE),
+    ("poly", [(38, 29), (90, 29), (90, 40), (70, 64), (90, 88), (90, 99),
+              (38, 99), (38, 88), (58, 64), (38, 40)], WHITE),
+    ("poly", [(49, 42), (79, 42), (64, 59)], BLACK),
+    ("poly", [(46, 95), (82, 95), (64, 78)], BLACK),
 ]
 
 
@@ -83,7 +83,7 @@ def png(size, pixels):
 
 
 if __name__ == "__main__":
-    out = Path(__file__).resolve().parent.parent / "icons"
+    out = Path(__file__).resolve().parent.parent / "public" / "icons"
     for size in (16, 32, 48, 128):
         (out / f"icon{size}.png").write_bytes(png(size, render(size)))
-        print(f"icons/icon{size}.png")
+        print(f"public/icons/icon{size}.png")

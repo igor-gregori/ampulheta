@@ -1,103 +1,131 @@
-/* Cores e base comuns a todas as telas. */
+/* Cores e base comuns a todas as telas: tokens do shadcn na base neutra
+   (preto e branco). O tema acompanha o sistema, sem seletor manual. */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist/wght.css";
+
+@source not "../docs";
+@source not "../store";
+
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+@theme inline {
+  --font-sans: "Geist Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
 
 :root {
   color-scheme: light dark;
+  --radius: 0.625rem;
 
-  --accent: #1D9E75;
-  --accent-light: #9FE1CB;
-  --accent-dark: #0F6E56;
-  --danger: #D2463C;
-  --danger-soft: #FBE7E5;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --warning: oklch(0.666 0.179 58.318);
+  --success: oklch(0.627 0.17 149.214);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
 
-  --bg: #FFFFFF;
-  --surface: #F7F8F7;
-  --text: #1C2421;
-  --muted: #66716D;
-  --border: #E3E7E5;
-  --track: #EBEFED;
-  --accent-soft: #E8F6F0;
-  --accent-text: var(--accent-dark);
-
-  --radius: 10px;
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  /* Séries do gráfico: uma cor por site. Vermelho fica de fora porque é o
+     sinal de limite atingido. */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #008300;
+  --chart-7: #6250d6;
+  --chart-other: oklch(0.8 0 0);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #141917;
-    --surface: #1B211F;
-    --text: #E6ECE9;
-    --muted: #93A09B;
-    --border: #2B3330;
-    --track: #27302D;
-    --accent-soft: #17352B;
-    --accent-text: var(--accent-light);
-    --danger: #F07167;
-    --danger-soft: #3A1F1D;
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --warning: oklch(0.769 0.188 70.08);
+    --success: oklch(0.723 0.219 149.579);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+
+    --chart-1: #3987e5;
+    --chart-2: #d95926;
+    --chart-3: #199e70;
+    --chart-4: #c98500;
+    --chart-5: #d55181;
+    --chart-6: #008300;
+    --chart-7: #9085e9;
+    --chart-other: oklch(0.45 0 0);
   }
 }
 
-*, *::before, *::after { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 14px;
-  line-height: 1.45;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
 }
 
-h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
-
-button {
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  padding: 7px 14px;
-  transition: background-color 0.15s, border-color 0.15s;
+/* O Chrome injeta fonte e `font-size: 75%` no body de páginas de extensão.
+   Fora de @layer e com mais especificidade para esse CSS não ganhar. */
+html body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
 }
-button:hover { background: var(--surface); }
-button:focus-visible, input:focus-visible, a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-button:disabled { cursor: default; opacity: 0.5; }
-
-button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #FFFFFF;
-}
-button.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
-
-input {
-  font: inherit;
-  color: inherit;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 7px 10px;
-}
-
-.muted { color: var(--muted); }
-.tabular { font-variant-numeric: tabular-nums; }
 
 /* Inicial do site, no lugar do favicon (que exigiria outra permissão). */
 .monogram {
-  width: 22px;
-  height: 22px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  background: var(--accent-soft);
-  color: var(--accent-text);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
+  @apply grid size-6 flex-none place-items-center rounded-md bg-muted text-[11px] font-semibold uppercase text-foreground;
 }

@@ -4,29 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Limite atingido · Ampulheta</title>
-  <link rel="icon" href="../icons/icon32.png">
-  <link rel="stylesheet" href="../shared/theme.css">
-  <link rel="stylesheet" href="blocked.css">
+  <link rel="icon" href="/icons/icon32.png">
 </head>
 <body>
-  <main class="card">
-    <img class="hourglass" src="../icons/icon128.png" alt="" width="64" height="64">
-    <span class="badge">Bloqueado por hoje</span>
-    <h1 id="phrase">Por hoje é só.</h1>
-    <p class="site" id="site"></p>
-    <p class="used">
-      Você passou <strong id="used" class="tabular">0 min</strong> aqui hoje.
-      <span id="limit-note" class="muted"></span>
-    </p>
-
-    <div class="actions">
-      <button id="extend" class="primary">Mais 5 min</button>
-      <button id="go-back" class="primary" hidden>Voltar ao site</button>
-      <button id="close-tab">Fechar aba</button>
-    </div>
-    <p id="extend-note" class="muted note"></p>
-  </main>
-
-  <script type="module" src="blocked.js"></script>
+  <div id="root"></div>
+  <script type="module" src="./main.jsx"></script>
 </body>
 </html>

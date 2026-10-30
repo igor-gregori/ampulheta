@@ -2,6 +2,8 @@
 //
 // usage:      { "2026-10-23": { "youtube.com": 2280 } }   segundos por dia
 // limits:     { "youtube.com": 60 }                       minutos por dia
+//             { "youtube.com": { minutes: 60, days: { 0: 90, 6: 120 } } }
+//                                                         com dias próprios (0 = domingo)
 // extensions: { "2026-10-23": { "youtube.com": true } }   "mais 5 min" usado
 // warned:     { "2026-10-23": { "youtube.com": true } }   aviso de 5 min enviado
 // exceeded:   { "2026-10-23": { "youtube.com": true } }   limite estourou no dia
@@ -118,9 +120,35 @@ export async function getLimits() {
   return get('limits', { ...DEFAULT_LIMITS });
 }
 
+// Um limite é só um número até ganhar um dia próprio.
+export function limitEntry(limit) {
+  return typeof limit === 'number' ? { minutes: limit, days: {} } : limit;
+}
+
+function packLimit(minutes, days) {
+  return Object.keys(days).length ? { minutes, days } : minutes;
+}
+
+// Minutos permitidos em `domain` no dia `day`.
+export function limitForDay(limits, domain, day = dayKey()) {
+  const { minutes, days } = limitEntry(limits[domain]);
+  return days[parseDayKey(day).getDay()] ?? minutes;
+}
+
 export async function setLimit(domain, minutes) {
   const limits = await getLimits();
-  limits[domain] = minutes;
+  const { days } = limitEntry(limits[domain] ?? minutes);
+  limits[domain] = packLimit(minutes, days);
+  await set('limits', limits);
+}
+
+// `minutes` null volta o dia da semana para o limite padrão do site.
+export async function setDayLimit(domain, weekday, minutes) {
+  const limits = await getLimits();
+  const { minutes: base, days } = limitEntry(limits[domain]);
+  if (minutes === null) delete days[weekday];
+  else days[weekday] = minutes;
+  limits[domain] = packLimit(base, days);
   await set('limits', limits);
 }
 
@@ -158,7 +186,7 @@ export async function allowanceSeconds(limitDomain, day = dayKey()) {
   const limits = await getLimits();
   if (!(limitDomain in limits)) return null;
   const extra = (await hasExtension(limitDomain, day)) ? EXTENSION_SECONDS : 0;
-  return limits[limitDomain] * 60 + extra;
+  return limitForDay(limits, limitDomain, day) * 60 + extra;
 }
 
 // Soma o uso de hoje de todos os domínios cobertos por um limite.
