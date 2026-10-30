@@ -23,7 +23,7 @@ LIMITES DIÁRIOS
 • Escolha um limite em minutos para cada site. O YouTube já vem com 60 minutos.
 • Dê mais ou menos tempo em dias específicos, como no sábado e no domingo.
 • Um aviso chega quando faltam 5 minutos.
-• Quando o limite acaba, o site fica pausado até o dia seguinte. Se precisar mesmo, o botão "Mais 5 min" pode ser usado uma vez por dia.
+• Quando o limite acaba, o site fica pausado até o dia seguinte. Se precisar mesmo, dá para pedir mais 5 ou 10 minutos uma vez por dia, com uma mensagem sua para pensar duas vezes antes.
 • Subdomínios contam juntos: www.youtube.com, m.youtube.com e music.youtube.com entram na conta do youtube.com.
 
 CONTAGEM JUSTA
@@ -79,6 +79,7 @@ Ajudar a pessoa a controlar o tempo gasto em sites: mede o tempo em cada site, a
 | `idle` | Parar a contagem quando a pessoa está longe do computador ou com a tela bloqueada, para não contar tempo que não foi usado. |
 | `alarms` | Gravar o tempo a cada minuto (o service worker pode ser encerrado), agendar o aviso de 5 minutos e o bloqueio, e disparar o resumo de sábado. |
 | `notifications` | Avisar quando faltam 5 minutos para o limite e quando o resumo da semana está pronto. |
+| `favicon` | Mostrar o ícone de cada site na lista de sites e nos limites, lendo o cache do próprio Chrome, sem nenhuma requisição de rede. |
 
 **Usa código remoto?** Não. Todo o JavaScript está no pacote.
 

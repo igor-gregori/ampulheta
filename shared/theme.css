@@ -1,5 +1,5 @@
 /* Cores e base comuns a todas as telas: tokens do shadcn na base neutra
-   (preto e branco). O tema acompanha o sistema, sem seletor manual. */
+   (preto e branco). A classe .dark no <html> vem de public/theme.js. */
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -8,7 +8,7 @@
 @source not "../docs";
 @source not "../store";
 
-@custom-variant dark (@media (prefers-color-scheme: dark));
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --font-sans: "Geist Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -41,7 +41,7 @@
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --radius: 0.625rem;
 
   --background: oklch(1 0 0);
@@ -77,38 +77,37 @@
   --chart-other: oklch(0.8 0 0);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --warning: oklch(0.769 0.188 70.08);
-    --success: oklch(0.723 0.219 149.579);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --warning: oklch(0.769 0.188 70.08);
+  --success: oklch(0.723 0.219 149.579);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
 
-    --chart-1: #3987e5;
-    --chart-2: #d95926;
-    --chart-3: #199e70;
-    --chart-4: #c98500;
-    --chart-5: #d55181;
-    --chart-6: #008300;
-    --chart-7: #9085e9;
-    --chart-other: oklch(0.45 0 0);
-  }
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --chart-6: #008300;
+  --chart-7: #9085e9;
+  --chart-other: oklch(0.45 0 0);
 }
 
 @layer base {
@@ -125,7 +124,9 @@ html body {
   font-size: 1rem;
 }
 
-/* Inicial do site, no lugar do favicon (que exigiria outra permissão). */
-.monogram {
-  @apply grid size-6 flex-none place-items-center rounded-md bg-muted text-[11px] font-semibold uppercase text-foreground;
+/* Inicial do site, para quando ainda não há um ícone guardado. */
+@layer components {
+  .monogram {
+    @apply grid size-6 flex-none place-items-center rounded-md bg-muted text-xs font-semibold uppercase text-foreground;
+  }
 }

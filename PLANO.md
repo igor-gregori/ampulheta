@@ -12,7 +12,7 @@ Extensão para Google Chrome (Manifest V3) que limita o tempo em sites escolhido
 - Cada site tem um limite diário em minutos. O YouTube já vem configurado com 60 min.
 - Cada dia da semana pode ter um limite próprio; dia sem valor usa o limite padrão do site.
 - Aviso por notificação quando faltam 5 minutos.
-- Quando o limite estoura, a aba é redirecionada para a tela de bloqueio (`blocked/`). Ela mostra o tempo usado e tem um botão "mais 5 min", que pode ser usado no máximo 1x por dia.
+- Quando o limite estoura, a aba é redirecionada para a tela de bloqueio (`blocked/`). Ela mostra o tempo usado e tem os botões "mais 5 min" e "mais 10 min"; só um deles pode ser usado por dia. Se houver uma mensagem configurada, ela aparece antes de liberar o tempo.
 
 ### 3. Dashboard semanal
 - Todo sábado de manhã chega a notificação "Seu resumo da semana está pronto", que abre o dashboard.
@@ -48,10 +48,10 @@ ampulheta/
 ## Design
 - Visual limpo e plano, com bordas finas e bastante espaço em branco.
 - Paleta preta e branca do shadcn (base neutra). Cores só onde carregam informação: uma por site no gráfico, âmbar para "faltam 5 min" e vermelho para "bloqueado".
-- Tema claro e escuro automático (`prefers-color-scheme`), com cores definidas como variáveis CSS em `:root`.
+- Tema claro, escuro ou do sistema, escolhido no botão do topo, com cores definidas como variáveis CSS em `:root` e `.dark`.
 - Popup: o anel de progresso do site atual é o elemento central ("38 min de 60 hoje").
-- Tela de bloqueio: tom gentil, com uma frase curta, o tempo usado e o botão "mais 5 min".
-- Ícone: ampulheta branca sobre um quadrado preto.
+- Tela de bloqueio: tom gentil, com uma frase curta, o tempo usado e os botões de mais tempo.
+- Ícone: letra A branca sobre um quadrado preto, com um monte de areia âmbar.
 
 ## Etapas
 1. **Esqueleto:** `manifest.json` e contagem de tempo no `background.js`. Validar pelo console do service worker.
@@ -68,7 +68,10 @@ ampulheta/
 
 ## Decisões tomadas
 - **Nome:** Ampulheta.
-- **Ao estourar o limite:** tela de bloqueio com botão "mais 5 min", que pode ser usado 1x por dia por site.
+- **Ao estourar o limite:** tela de bloqueio com "mais 5 min" e "mais 10 min". Vale uma escolha por dia por site.
+- **Ícones dos sites:** o `_favicon` do Chrome só conhece o endereço exato de uma página visitada, então o service worker pega o ícone com a aba aberta e guarda a imagem, sem guardar o endereço. Nada vai para a rede. Sem ícone, aparece a inicial.
+- **Selo no ícone:** por aba, com o tempo de hoje no site, atualizado a cada evento e a cada minuto.
+- **Tema:** classe `.dark` no `<html>`, aplicada por `public/theme.js` antes da primeira pintura. Fica no `localStorage` porque `chrome.storage` é assíncrono.
 - **Vídeo sem mexer no mouse:** a aba que está tocando áudio continua contando mesmo com o `chrome.idle` em "ocioso". Sem isso, assistir YouTube parado deixaria de contar depois de 60 s. Tela bloqueada nunca conta.
 - **Semana do resumo:** de sábado a sexta. A notificação sai no sábado às 9h e abre a semana que acabou de terminar. Pelo popup abre a semana atual, comparada com os mesmos dias da semana anterior.
 - **"Limites respeitados":** dias em que nenhum site chegou ao bloqueio (registro `exceeded` por dia), contados a partir do primeiro dia com dados.

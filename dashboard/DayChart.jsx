@@ -1,15 +1,14 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Maximize2 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis, YAxis } from 'recharts';
 import * as store from '@/shared/storage.js';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip } from '@/shared/ui/chart';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
-
-const weekdayLong = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+import { weekdayLong } from './summary.js';
 
 // Degraus do eixo Y, em minutos. Usa o menor que deixa no máximo 4 divisões.
 const TICK_STEPS = [15, 30, 60, 120, 180, 240, 360];
@@ -32,14 +31,20 @@ function tickLabel(seconds) {
 
 // Só o topo da coluna é arredondado, e o espaço entre as partes sai da
 // própria parte, para a altura total continuar exata.
-function Segment({ seriesId, series, peak, ...props }) {
+function Segment({ seriesId, series, peak, selected, ...props }) {
   const { x, y, width, height, payload } = props;
   if (!height) return null;
   const isTop = series.findLast((s) => payload[s.id])?.id === seriesId;
   const gap = !isTop && height > SEGMENT_GAP * 2 ? SEGMENT_GAP : 0;
   return (
     <g>
-      <Rectangle {...props} y={y + gap} height={height - gap} radius={isTop ? [4, 4, 0, 0] : 0} />
+      <Rectangle
+        {...props}
+        y={y + gap}
+        height={height - gap}
+        radius={isTop ? [4, 4, 0, 0] : 0}
+        fillOpacity={selected && payload.key !== selected ? 0.3 : 1}
+      />
       {isTop && payload.key === peak?.key && (
         <text x={x + width / 2} y={y - 8} textAnchor="middle" className="fill-foreground text-xs tabular-nums">
           {store.formatDuration(payload.total)}
@@ -49,11 +54,12 @@ function Segment({ seriesId, series, peak, ...props }) {
   );
 }
 
-function DayTick({ x, y, payload, rows }) {
+function DayTick({ x, y, payload, rows, selected }) {
   const row = rows.find((r) => r.label === payload.value);
+  const strong = row?.today || (selected && row?.key === selected);
   return (
     <g>
-      <text x={x} y={y + 10} textAnchor="middle" className={cn('fill-muted-foreground text-xs', row?.today && 'fill-foreground font-medium')}>
+      <text x={x} y={y + 10} textAnchor="middle" className={cn('fill-muted-foreground text-xs', strong && 'fill-foreground font-medium')}>
         {payload.value}
       </text>
       {row?.exceeded.length > 0 && <circle cx={x} cy={y + 20} r={3} className="fill-destructive" />}
@@ -82,7 +88,7 @@ function DayTooltip({ active, payload, series }) {
           ))}
           <div className="flex justify-between gap-3 border-t pt-1.5 font-medium">
             <span>Total</span>
-            <span className="font-mono tabular-nums">{store.formatDuration(row.total)}</span>
+            <span className="tabular-nums">{store.formatDuration(row.total)}</span>
           </div>
           {row.exceeded.length > 0 && (
             <p className="text-destructive">Limite atingido: {row.exceeded.join(', ')}</p>
@@ -93,7 +99,7 @@ function DayTooltip({ active, payload, series }) {
   );
 }
 
-function DayTable({ rows }) {
+function DayTable({ rows, onSelect }) {
   return (
     <Table>
       <TableHeader>
@@ -106,7 +112,11 @@ function DayTable({ rows }) {
       <TableBody>
         {rows.map((d) => (
           <TableRow key={d.key}>
-            <TableCell className="capitalize">{weekdayLong.format(d.date)}</TableCell>
+            <TableCell className="capitalize">
+              {d.total > 0
+                ? <Button variant="link" size="sm" className="h-auto p-0 font-normal capitalize" onClick={() => onSelect(d.key)}>{weekdayLong.format(d.date)}</Button>
+                : weekdayLong.format(d.date)}
+            </TableCell>
             <TableCell className="tabular-nums">{d.future ? '—' : store.formatDuration(d.total)}</TableCell>
             <TableCell>
               {d.exceeded.length ? `atingido em ${d.exceeded.join(', ')}` : d.tracked ? 'respeitados' : '—'}
@@ -118,66 +128,85 @@ function DayTable({ rows }) {
   );
 }
 
-export function DayChart({ series, rows, className }) {
-  const [tableOpen, setTableOpen] = useState(false);
+// Só o gráfico: usado no cartão e, maior, na janela de zoom.
+export function DayPlot({ series, rows, selected, onSelect, className }) {
   const peak = rows.reduce((best, d) => (d.total > (best?.total ?? 0) ? d : best), null);
   const ticks = yTicks(peak?.total ?? 3600);
-  const hasExceeded = rows.some((d) => d.exceeded.length);
   const config = useMemo(
     () => Object.fromEntries(series.map((s) => [s.id, { label: s.label, color: s.color }])),
     [series],
   );
 
+  const handleClick = (state) => {
+    const row = rows[Number(state?.activeTooltipIndex)];
+    if (row?.total) onSelect(row.key === selected ? null : row.key);
+  };
+
+  return (
+    <ChartContainer
+      config={config}
+      className={cn('aspect-auto w-full [&_.recharts-surface]:cursor-pointer [&_g]:outline-hidden', className)}
+      role="img"
+      aria-label={rows.map((d) => `${weekdayLong.format(d.date)}: ${store.formatDuration(d.total)}`).join('; ')}
+    >
+      <BarChart data={rows} margin={{ top: 20, right: 4, left: 0, bottom: 8 }} onClick={handleClick}>
+        <CartesianGrid vertical={false} />
+        <XAxis
+          dataKey="label"
+          axisLine={false}
+          tickLine={false}
+          interval={0}
+          height={36}
+          tick={<DayTick rows={rows} selected={selected} />}
+        />
+        <YAxis
+          axisLine={false}
+          tickLine={false}
+          width={52}
+          ticks={ticks}
+          domain={[0, ticks.at(-1)]}
+          tickFormatter={tickLabel}
+        />
+        <ChartTooltip cursor={{ fill: 'var(--muted)' }} content={<DayTooltip series={series} />} />
+        {series.length > 1 && <ChartLegend itemSorter={null} content={<ChartLegendContent className="flex-wrap gap-y-1" />} />}
+        {series.map((s) => (
+          <Bar
+            key={s.id}
+            dataKey={s.id}
+            stackId="day"
+            fill={`var(--color-${s.id})`}
+            maxBarSize={28}
+            isAnimationActive={false}
+            shape={<Segment seriesId={s.id} series={series} peak={peak} selected={selected} />}
+          />
+        ))}
+      </BarChart>
+    </ChartContainer>
+  );
+}
+
+export function DayChart({ series, rows, selected, onSelect, onZoom, className }) {
+  const [tableOpen, setTableOpen] = useState(false);
+  const hasExceeded = rows.some((d) => d.exceeded.length);
+
   return (
     <Card className={className}>
-      <CardHeader className="flex items-center justify-between">
+      <CardHeader>
         <CardTitle>Por dia</CardTitle>
-        {hasExceeded && (
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <i className="size-2 rounded-full bg-destructive" aria-hidden="true" />limite atingido
-          </span>
-        )}
+        <CardDescription>Clique em um dia para ver os sites dele</CardDescription>
+        <CardAction className="flex items-center gap-3">
+          {hasExceeded && (
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <i className="size-2 rounded-full bg-destructive" aria-hidden="true" />limite atingido
+            </span>
+          )}
+          <Button variant="outline" size="icon-sm" title="Ampliar gráfico" aria-label="Ampliar gráfico" onClick={onZoom}>
+            <Maximize2 />
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent className="space-y-3">
-        <ChartContainer
-          config={config}
-          className="aspect-auto h-80 w-full"
-          role="img"
-          aria-label={rows.map((d) => `${weekdayLong.format(d.date)}: ${store.formatDuration(d.total)}`).join('; ')}
-        >
-          <BarChart data={rows} margin={{ top: 20, right: 4, left: 0, bottom: 8 }}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="label"
-              axisLine={false}
-              tickLine={false}
-              interval={0}
-              height={36}
-              tick={<DayTick rows={rows} />}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              width={52}
-              ticks={ticks}
-              domain={[0, ticks.at(-1)]}
-              tickFormatter={tickLabel}
-            />
-            <ChartTooltip cursor={{ fill: 'var(--muted)' }} content={<DayTooltip series={series} />} />
-            {series.length > 1 && <ChartLegend itemSorter={null} content={<ChartLegendContent className="flex-wrap gap-y-1" />} />}
-            {series.map((s) => (
-              <Bar
-                key={s.id}
-                dataKey={s.id}
-                stackId="day"
-                fill={`var(--color-${s.id})`}
-                maxBarSize={28}
-                isAnimationActive={false}
-                shape={<Segment seriesId={s.id} series={series} peak={peak} />}
-              />
-            ))}
-          </BarChart>
-        </ChartContainer>
+        <DayPlot className="h-80" series={series} rows={rows} selected={selected} onSelect={onSelect} />
 
         <Collapsible open={tableOpen} onOpenChange={setTableOpen}>
           <CollapsibleTrigger asChild>
@@ -186,7 +215,7 @@ export function DayChart({ series, rows, className }) {
               Ver como tabela
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="pt-2"><DayTable rows={rows} /></CollapsibleContent>
+          <CollapsibleContent className="pt-2"><DayTable rows={rows} onSelect={onSelect} /></CollapsibleContent>
         </Collapsible>
       </CardContent>
     </Card>

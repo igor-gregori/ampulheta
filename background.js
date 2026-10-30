@@ -21,6 +21,11 @@ const SATURDAY = 6;
 const BLOCKED_PAGE = chrome.runtime.getURL('blocked/blocked.html');
 const DASHBOARD_PAGE = chrome.runtime.getURL('dashboard/dashboard.html');
 
+const BADGE_COLOR = '#2563EB';
+const BADGE_WARNING_COLOR = '#D97706';
+const FAVICON_SIZE = '32';
+const UNKNOWN_PAGE = 'https://ampulheta.invalid/';
+
 // ---------- fila: um evento por vez, para não somar o mesmo intervalo duas vezes ----------
 
 let queue = Promise.resolve();
@@ -100,6 +105,8 @@ function update() {
     }
     await setCurrent({ domain: active.domain, tabId: active.tab.id, since: now });
     await scheduleLimitCheck(active.domain);
+    await updateBadge(active.tab.id, active.domain);
+    await rememberIcon(active.tab, active.domain);
   });
 }
 
@@ -161,6 +168,44 @@ async function enforceBackgroundTab(tab) {
   if (domain) await enforce(tab, domain);
 }
 
+// ---------- ícone da extensão e ícones dos sites ----------
+
+// O selo é por aba: o Chrome limpa sozinho quando a aba navega.
+async function updateBadge(tabId, domain) {
+  const status = await limitStatus(domain);
+  const seconds = status ? status.used : (await store.getUsageForDay())[domain] ?? 0;
+  const near = status && status.remaining <= store.WARNING_SECONDS;
+  try {
+    await chrome.action.setBadgeBackgroundColor({ tabId, color: near ? BADGE_WARNING_COLOR : BADGE_COLOR });
+    await chrome.action.setBadgeTextColor({ tabId, color: '#FFFFFF' });
+    await chrome.action.setBadgeText({ tabId, text: store.formatBadge(seconds) });
+  } catch {
+    // A aba fechou no meio do caminho.
+  }
+}
+
+async function faviconData(pageUrl) {
+  const url = new URL(chrome.runtime.getURL('_favicon/'));
+  url.searchParams.set('pageUrl', pageUrl);
+  url.searchParams.set('size', FAVICON_SIZE);
+  const response = await fetch(url);
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  return `data:image/png;base64,${btoa(String.fromCharCode(...bytes))}`;
+}
+
+// O _favicon do Chrome só conhece o endereço exato de uma página já visitada,
+// então a hora de pegar o ícone é com a aba aberta. Guarda a imagem, não o
+// endereço. Sem ícone conhecido ele devolve um globo genérico, que não serve.
+async function rememberIcon(tab, domain) {
+  if (domain in (await store.getSiteIcons())) return;
+  try {
+    const [icon, unknown] = await Promise.all([faviconData(tab.url), faviconData(UNKNOWN_PAGE)]);
+    if (icon !== unknown) await store.setSiteIcon(domain, icon);
+  } catch (error) {
+    console.warn('[ampulheta] sem ícone para', domain, error);
+  }
+}
+
 // ---------- resumo de sábado ----------
 
 function nextSaturdayMorning(now = new Date()) {
@@ -213,7 +258,7 @@ chrome.windows.onFocusChanged.addListener(() => update());
 chrome.idle.onStateChanged.addListener(() => update());
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (!changeInfo.url && changeInfo.audible === undefined) return;
+  if (!changeInfo.url && !changeInfo.favIconUrl && changeInfo.audible === undefined) return;
   if (tab.active) update();
   else if (changeInfo.url) serial(() => enforceBackgroundTab(tab));
 });
@@ -250,13 +295,14 @@ async function handleMessage(message) {
       await update();
       return { ok: true, current: await getCurrent(), now: Date.now() };
     }
-    // Tela de bloqueio: "mais 5 min", 1x por dia por site.
+    // Tela de bloqueio: mais 5 ou 10 min, 1x por dia por site.
     case 'extend': {
       const site = store.normalizeDomain(message.site);
       if (!site) return { ok: false, reason: 'invalid' };
+      const minutes = store.EXTENSION_MINUTES.includes(message.minutes) ? message.minutes : store.EXTENSION_MINUTES[0];
       return serial(async () => {
         if (await store.hasExtension(site)) return { ok: false, reason: 'used' };
-        await store.markExtension(site);
+        await store.markExtension(site, minutes);
         return { ok: true };
       });
     }

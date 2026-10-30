@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import * as store from '@/shared/storage.js';
 import { useStorageChange } from '@/shared/hooks/use-storage-change.js';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/shared/ui/alert-dialog';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 
-const REFRESH_KEYS = ['limits', 'extensions'];
+const REFRESH_KEYS = ['limits', 'extensions', 'extendMessage'];
 
 const PHRASES = [
   'Por hoje é só.',
@@ -33,12 +37,14 @@ async function readStatus() {
     used: store.usedForLimit(site, await store.getUsageForDay(day)),
     allowance: await store.allowanceSeconds(site, day),
     extended: await store.hasExtension(site, day),
+    message: await store.getExtendMessage(),
   };
 }
 
 export function App() {
   const [status, setStatus] = useState(null);
   const [waiting, setWaiting] = useState(false);
+  const [asking, setAsking] = useState(null); // minutos pedidos, à espera da confirmação
 
   const refresh = () => readStatus().then(setStatus);
   useEffect(() => {
@@ -48,14 +54,15 @@ export function App() {
   useStorageChange(REFRESH_KEYS, refresh);
 
   if (!status) return null;
-  const { used, allowance, extended } = status;
+  const { used, allowance, extended, message } = status;
 
   // O limite pode ter sido aumentado ou removido nas opções.
   const free = allowance === null || used < allowance;
 
-  const extend = async () => {
+  const extend = async (minutes) => {
+    setAsking(null);
     setWaiting(true);
-    const result = await chrome.runtime.sendMessage({ type: 'extend', site });
+    const result = await chrome.runtime.sendMessage({ type: 'extend', site, minutes });
     if (result?.ok) location.replace(returnUrl());
     else {
       setWaiting(false);
@@ -88,14 +95,36 @@ export function App() {
           <div className="mt-7 flex w-full flex-wrap justify-center gap-2.5">
             {free
               ? <Button className="min-w-32 flex-1" onClick={() => location.replace(returnUrl())}>Voltar ao site</Button>
-              : <Button className="min-w-32 flex-1" disabled={extended || waiting} onClick={extend}>Mais 5 min</Button>}
-            <Button className="min-w-32 flex-1" variant="outline" onClick={closeTab}>Fechar aba</Button>
+              : store.EXTENSION_MINUTES.map((minutes) => (
+                <Button
+                  key={minutes}
+                  className="min-w-32 flex-1"
+                  disabled={extended || waiting}
+                  onClick={() => (message ? setAsking(minutes) : extend(minutes))}
+                >
+                  Mais {minutes} min
+                </Button>
+              ))}
+            <Button className="w-full" variant="outline" onClick={closeTab}>Fechar aba</Button>
           </div>
           <p className="mt-3.5 min-h-5 text-sm text-muted-foreground">
-            {!free && (extended ? 'Os 5 minutos extras de hoje já foram usados.' : 'Dá para pedir mais 5 minutos uma vez por dia.')}
+            {!free && (extended ? 'Os minutos extras de hoje já foram usados.' : 'Dá para pedir mais tempo uma vez por dia.')}
           </p>
         </CardContent>
       </Card>
+
+      <AlertDialog open={asking !== null} onOpenChange={(open) => { if (!open) setAsking(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mais {asking} min?</AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-wrap">{message}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Deixar para lá</AlertDialogCancel>
+            <AlertDialogAction onClick={() => extend(asking)}>Usar mais {asking} min</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

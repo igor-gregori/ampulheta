@@ -4,12 +4,14 @@
 // limits:     { "youtube.com": 60 }                       minutos por dia
 //             { "youtube.com": { minutes: 60, days: { 0: 90, 6: 120 } } }
 //                                                         com dias próprios (0 = domingo)
-// extensions: { "2026-10-23": { "youtube.com": true } }   "mais 5 min" usado
+// extensions: { "2026-10-23": { "youtube.com": 10 } }     minutos extras usados no dia
 // warned:     { "2026-10-23": { "youtube.com": true } }   aviso de 5 min enviado
 // exceeded:   { "2026-10-23": { "youtube.com": true } }   limite estourou no dia
+// siteIcons:  { "youtube.com": "data:image/png;base64,…" } ícone de cada site
+// extendMessage: "Tem certeza?"                           aparece ao pedir mais tempo
 
 export const DEFAULT_LIMITS = { 'youtube.com': 60 };
-export const EXTENSION_SECONDS = 5 * 60;
+export const EXTENSION_MINUTES = [5, 10];
 export const WARNING_SECONDS = 5 * 60;
 export const RETENTION_DAYS = 90;
 
@@ -168,25 +170,48 @@ async function getDailyFlag(key, domain, day) {
   return Boolean(all[day]?.[domain]);
 }
 
-async function setDailyFlag(key, domain, day) {
+async function setDailyFlag(key, domain, day, value = true) {
   const all = await get(key, {});
-  all[day] = { ...(all[day] ?? {}), [domain]: true };
+  all[day] = { ...(all[day] ?? {}), [domain]: value };
   await set(key, all);
 }
 
 export const hasExtension = (domain, day = dayKey()) => getDailyFlag('extensions', domain, day);
-export const markExtension = (domain, day = dayKey()) => setDailyFlag('extensions', domain, day);
+export const markExtension = (domain, minutes, day = dayKey()) => setDailyFlag('extensions', domain, day, minutes);
 export const wasWarned = (domain, day = dayKey()) => getDailyFlag('warned', domain, day);
 export const markWarned = (domain, day = dayKey()) => setDailyFlag('warned', domain, day);
 export const wasExceeded = (domain, day = dayKey()) => getDailyFlag('exceeded', domain, day);
 export const markExceeded = (domain, day = dayKey()) => setDailyFlag('exceeded', domain, day);
 
-// Limite efetivo do dia em segundos, já somando o "mais 5 min".
+// Antes de existir o "mais 10 min", o dia guardava só `true` (5 minutos).
+export function extensionSeconds(extension) {
+  return (extension === true ? 5 : extension ?? 0) * 60;
+}
+
+// Limite efetivo do dia em segundos, já somando os minutos extras.
 export async function allowanceSeconds(limitDomain, day = dayKey()) {
   const limits = await getLimits();
   if (!(limitDomain in limits)) return null;
-  const extra = (await hasExtension(limitDomain, day)) ? EXTENSION_SECONDS : 0;
-  return limitForDay(limits, limitDomain, day) * 60 + extra;
+  const extensions = await get('extensions', {});
+  return limitForDay(limits, limitDomain, day) * 60 + extensionSeconds(extensions[day]?.[limitDomain]);
+}
+
+export async function getExtendMessage() {
+  return get('extendMessage', '');
+}
+
+export async function setExtendMessage(message) {
+  await set('extendMessage', message.trim());
+}
+
+export async function getSiteIcons() {
+  return get('siteIcons', {});
+}
+
+export async function setSiteIcon(domain, icon) {
+  const icons = await getSiteIcons();
+  icons[domain] = icon;
+  await set('siteIcons', icons);
 }
 
 // Soma o uso de hoje de todos os domínios cobertos por um limite.
@@ -198,10 +223,11 @@ export function usedForLimit(limitDomain, dayUsage) {
   return total;
 }
 
-// Apaga dados diários com mais de RETENTION_DAYS dias.
+// Apaga dados diários com mais de RETENTION_DAYS dias e os ícones dos sites
+// que saíram do histórico.
 export async function pruneOldData(now = new Date()) {
   const cutoff = dayKey(addDays(now, -RETENTION_DAYS));
-  const data = await chrome.storage.local.get(DAILY_KEYS);
+  const data = await chrome.storage.local.get([...DAILY_KEYS, 'limits', 'siteIcons']);
   const updates = {};
   for (const key of DAILY_KEYS) {
     const all = data[key];
@@ -215,10 +241,25 @@ export async function pruneOldData(now = new Date()) {
     }
     if (removed) updates[key] = all;
   }
+  if (data.siteIcons) {
+    const kept = new Set(Object.keys(data.limits ?? {}));
+    for (const day of Object.values(data.usage ?? {})) {
+      for (const domain of Object.keys(day)) kept.add(domain);
+    }
+    const icons = Object.entries(data.siteIcons).filter(([domain]) => kept.has(domain));
+    if (icons.length < Object.keys(data.siteIcons).length) updates.siteIcons = Object.fromEntries(icons);
+  }
   if (Object.keys(updates).length) await chrome.storage.local.set(updates);
 }
 
 // ---------- formatação ----------
+
+// Texto do selo no ícone da extensão, que só tem espaço para uns 4 caracteres.
+export function formatBadge(seconds) {
+  const total = Math.floor(seconds / 60);
+  if (total < 60) return `${total}m`;
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+}
 
 export function formatDuration(seconds) {
   const total = Math.max(0, Math.round(seconds / 60));

@@ -10,6 +10,7 @@ const COLOR_SLOTS = 7;
 const weekdayShort = new Intl.DateTimeFormat('pt-BR', { weekday: 'short' });
 
 export const shortDay = (date) => weekdayShort.format(date).replace('.', '');
+export const weekdayLong = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 
 export function startOfWeek(date) {
   const day = new Date(date);
@@ -50,17 +51,22 @@ export function summarize(data, start) {
     .slice(0, elapsed)
     .reduce((sum, date) => sum + sumDay(data.usage[store.dayKey(date)]), 0);
 
+  const ranking = rankSites(data.usage, days.map((d) => d.key));
+
+  return { days, elapsed, total, previous, ranking, inProgress: elapsed < 7 };
+}
+
+// Sites usados nos dias `keys`, do mais usado ao menos usado.
+export function rankSites(usage, keys) {
   const sites = {};
-  for (const d of days) {
-    for (const [domain, seconds] of Object.entries(data.usage[d.key] ?? {})) {
+  for (const key of keys) {
+    for (const [domain, seconds] of Object.entries(usage[key] ?? {})) {
       sites[domain] = (sites[domain] ?? 0) + seconds;
     }
   }
-  const ranking = Object.entries(sites)
+  return Object.entries(sites)
     .filter(([, seconds]) => seconds > 0)
     .sort((a, b) => b[1] - a[1]);
-
-  return { days, elapsed, total, previous, ranking, inProgress: elapsed < 7 };
 }
 
 // A cor acompanha o site, não a posição na semana: os mais usados no histórico

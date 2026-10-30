@@ -9,15 +9,16 @@ Tudo fica no seu navegador (`chrome.storage.local`). Não há servidor, conta ou
 ## O que faz
 
 - **Conta o tempo por site** só quando a aba está ativa, a janela do Chrome está em foco e você não está ocioso. Vídeo tocando conta mesmo sem mexer no mouse. `www.youtube.com` e `m.youtube.com` contam como `youtube.com`.
-- **Limite diário por site, com dias próprios.** O YouTube já vem com 60 min, e cada dia da semana pode ter um valor diferente: mais tempo no sábado e no domingo, por exemplo. Faltando 5 min chega um aviso; quando o limite estoura, a aba vai para uma tela de bloqueio com o botão **mais 5 min**, que pode ser usado uma vez por dia por site.
+- **Limite diário por site, com dias próprios.** O YouTube já vem com 60 min, e cada dia da semana pode ter um valor diferente: mais tempo no sábado e no domingo, por exemplo. Faltando 5 min chega um aviso; quando o limite estoura, a aba vai para uma tela de bloqueio com os botões **mais 5 min** e **mais 10 min**. Só um deles pode ser usado por dia em cada site, e dá para configurar uma mensagem que aparece antes de liberar o tempo.
+- **Selo no ícone da extensão** com o tempo de hoje no site aberto ("38m", "1:05"), que muda de cor quando faltam 5 min.
 - **Popup** com um anel de progresso do site atual ("38 min de 60 hoje"), o tempo de hoje em cada site e o botão do resumo sempre à vista.
-- **Resumo semanal** (sábado a sexta): tempo total, comparação com a semana anterior, dias em que os limites foram respeitados, gráfico por dia dividido por site e a lista de todos os sites usados. A notificação chega no sábado às 9h e o resumo também abre pelo popup.
+- **Resumo semanal** (sábado a sexta): tempo total, comparação com a semana anterior, dias em que os limites foram respeitados, gráfico por dia dividido por site, que pode ser ampliado, e a lista de todos os sites usados, da semana ou do dia clicado no gráfico. A notificação chega no sábado às 9h e o resumo também abre pelo popup.
 - **Uma página só** para o resumo e para os sites e limites.
-- Visual em preto e branco com [shadcn/ui](https://ui.shadcn.com/), tema claro e escuro automático. Histórico com mais de 90 dias é apagado sozinho.
+- Visual em preto e branco com [shadcn/ui](https://ui.shadcn.com/), tema claro, escuro ou do sistema, e o ícone de cada site ao lado do nome. Histórico com mais de 90 dias é apagado sozinho.
 
 | Tela de bloqueio | Sites e limites |
 | --- | --- |
-| ![Tela de bloqueio com o botão "Mais 5 min"](store/screenshot-3.jpg) | ![Cadastro de sites e limites](store/screenshot-4.jpg) |
+| ![Tela de bloqueio com os botões de mais tempo](store/screenshot-3.jpg) | ![Cadastro de sites e limites](store/screenshot-4.jpg) |
 
 ![Resumo da semana e popup no tema escuro](store/screenshot-5.jpg)
 
@@ -59,7 +60,7 @@ npm test
 ## Estrutura
 
 ```
-public/              manifest.json e ícones (icon.svg e PNGs gerados por tools/make_icons.py)
+public/              manifest.json, tema (theme.js) e ícones (icon.svg e PNGs gerados por tools/make_icons.py)
 background.js        service worker: contagem, limites e alarme de sábado
 popup/               anel de progresso e lista de hoje
 dashboard/           resumo semanal, sites e limites

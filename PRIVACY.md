@@ -1,6 +1,6 @@
 # Política de privacidade da Ampulheta
 
-_Última atualização: 23 de outubro de 2026_
+_Última atualização: 30 de outubro de 2026_
 
 A Ampulheta é uma extensão do Google Chrome que mede quanto tempo você passa em cada site, aplica os limites diários que você escolher e mostra um resumo semanal.
 
@@ -9,8 +9,11 @@ A Ampulheta é uma extensão do Google Chrome que mede quanto tempo você passa 
 Para funcionar, a Ampulheta guarda no armazenamento local do Chrome (`chrome.storage.local`), no seu computador:
 
 - o domínio dos sites que você visitou (por exemplo, `youtube.com`, sem o endereço completo da página) e quantos segundos passou em cada um, por dia;
-- os limites diários que você cadastrou;
-- se o aviso de 5 minutos, o bloqueio e o "mais 5 min" já aconteceram em cada dia.
+- os limites diários que você cadastrou, e a mensagem que você configurar para quando pedir mais tempo;
+- o ícone de cada site visitado, copiado do próprio Chrome;
+- se o aviso de 5 minutos, o bloqueio e os minutos extras já aconteceram em cada dia.
+
+O tema escolhido (claro, escuro ou sistema) fica no `localStorage` da extensão.
 
 Os dados com mais de 90 dias são apagados automaticamente. Você pode apagar todo o histórico a qualquer momento em *Sites e limites → Apagar histórico*, ou removendo a extensão.
 
@@ -30,6 +33,7 @@ Os dados com mais de 90 dias são apagados automaticamente. Você pode apagar to
 | `idle` | Parar de contar quando você está longe do computador. |
 | `alarms` | Gravar o tempo a cada minuto e agendar o aviso, o bloqueio e o resumo de sábado. |
 | `notifications` | Mostrar o aviso de 5 minutos e o aviso do resumo semanal. |
+| `favicon` | Ler o ícone dos sites no cache do próprio Chrome, para mostrar ao lado do nome de cada site. Nenhuma requisição é feita ao site nem a outro serviço. |
 
 ## Contato
 

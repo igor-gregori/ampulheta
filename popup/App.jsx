@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ChartColumnStacked, Settings2 } from 'lucide-react';
 import * as store from '@/shared/storage.js';
+import { ModeToggle } from '@/shared/components/mode-toggle.jsx';
+import { SiteIcon } from '@/shared/components/site-icon.jsx';
+import { useSiteIcons } from '@/shared/hooks/use-site-icons.js';
 import { useStorageChange } from '@/shared/hooks/use-storage-change.js';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
@@ -29,8 +32,7 @@ function liveUsage(state) {
 }
 
 function allowanceFor(state, limitDomain) {
-  const extra = state.extensions[limitDomain] ? store.EXTENSION_SECONDS : 0;
-  return store.limitForDay(state.limits, limitDomain) * 60 + extra;
+  return store.limitForDay(state.limits, limitDomain) * 60 + store.extensionSeconds(state.extensions[limitDomain]);
 }
 
 // O que o anel mostra para a aba atual.
@@ -81,13 +83,13 @@ function Ring({ main, sub, fraction, tone }) {
   );
 }
 
-function SiteItem({ domain, seconds, max, usage, state }) {
+function SiteItem({ domain, seconds, max, usage, state, icons }) {
   const limitDomain = store.matchLimitDomain(domain, state.limits);
   const over = limitDomain && store.usedForLimit(limitDomain, usage) >= allowanceFor(state, limitDomain);
 
   return (
     <li className="grid grid-cols-[24px_1fr_auto] items-center gap-x-2.5 gap-y-1 py-1.5">
-      <span className="monogram row-span-2">{domain[0]}</span>
+      <SiteIcon domain={domain} icons={icons} className="row-span-2" />
       <span className="truncate text-sm" title={domain}>{domain}</span>
       <span className={cn('text-xs text-muted-foreground tabular-nums', over && 'text-destructive')}>
         {limitDomain === domain
@@ -110,6 +112,7 @@ function openPage(path) {
 export function App() {
   const [state, setState] = useState(INITIAL);
   const [, setTick] = useState(0);
+  const icons = useSiteIcons();
 
   const load = async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -157,9 +160,12 @@ export function App() {
           <img src="/icons/icon32.png" alt="" width="18" height="18" />
           Ampulheta
         </div>
-        <Button variant="ghost" size="icon-sm" title="Sites e limites" aria-label="Sites e limites" onClick={() => openPage('#limites')}>
-          <Settings2 />
-        </Button>
+        <div className="flex items-center gap-1">
+          <ModeToggle />
+          <Button variant="ghost" size="icon-sm" title="Sites e limites" aria-label="Sites e limites" onClick={() => openPage('#limites')}>
+            <Settings2 />
+          </Button>
+        </div>
       </header>
 
       <section className="flex flex-col items-center px-4 pt-1 pb-3" aria-live="polite">
@@ -186,7 +192,7 @@ export function App() {
           ? (
             <ul className="min-h-0 flex-1 overflow-y-auto">
               {entries.map(([site, seconds]) => (
-                <SiteItem key={site} domain={site} seconds={seconds} max={max} usage={usage} state={state} />
+                <SiteItem key={site} domain={site} seconds={seconds} max={max} usage={usage} state={state} icons={icons} />
               ))}
             </ul>
           )

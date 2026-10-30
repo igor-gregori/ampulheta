@@ -32,7 +32,7 @@ test('dias próprios entram no lugar do limite padrão', async () => {
   assert.equal(store.limitForDay(limits, 'youtube.com', MONDAY), 60);
   assert.equal(await store.allowanceSeconds('youtube.com', SATURDAY), 120 * 60);
 
-  await store.markExtension('youtube.com', SATURDAY);
+  await store.markExtension('youtube.com', 5, SATURDAY);
   assert.equal(await store.allowanceSeconds('youtube.com', SATURDAY), 125 * 60);
 });
 

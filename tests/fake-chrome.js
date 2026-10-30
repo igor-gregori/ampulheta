@@ -56,6 +56,7 @@ export function createFakeChrome() {
     tabs: [{ id: 1, windowId: 1, active: true, url: 'https://www.youtube.com/watch?v=abc', audible: false }],
     alarms: new Map(),
     notifications: [],
+    badges: new Map(),
   };
 
   const chrome = {
@@ -69,6 +70,11 @@ export function createFakeChrome() {
       getURL: (path) => `chrome-extension://test/${path}`,
       onMessage: event(),
       openOptionsPage: async () => {},
+    },
+    action: {
+      async setBadgeText({ tabId, text }) { env.badges.set(tabId, { ...env.badges.get(tabId), text }); },
+      async setBadgeBackgroundColor({ tabId, color }) { env.badges.set(tabId, { ...env.badges.get(tabId), color }); },
+      async setBadgeTextColor() {},
     },
     windows: {
       WINDOW_ID_NONE: -1,

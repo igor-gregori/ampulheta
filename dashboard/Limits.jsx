@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { CalendarDays, ChevronDown, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import * as store from '@/shared/storage.js';
+import { SiteIcon } from '@/shared/components/site-icon.jsx';
+import { useSiteIcons } from '@/shared/hooks/use-site-icons.js';
 import { useStorageChange } from '@/shared/hooks/use-storage-change.js';
 import { cn } from '@/shared/lib/utils';
 import {
@@ -14,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui/collapsible';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
+import { Textarea } from '@/shared/ui/textarea';
 
 const LIMIT_KEYS = ['limits'];
 
@@ -67,7 +70,7 @@ function dayBadges({ minutes, days }) {
   return [...groups].map(([value, labels]) => `${labels.join(', ')}: ${value} min`);
 }
 
-function LimitRow({ domain, limit }) {
+function LimitRow({ domain, limit, icons }) {
   const entry = store.limitEntry(limit);
   const [open, setOpen] = useState(false);
   const badges = dayBadges(entry);
@@ -76,7 +79,7 @@ function LimitRow({ domain, limit }) {
     <Collapsible asChild open={open} onOpenChange={setOpen}>
       <li className="py-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="monogram">{domain[0]}</span>
+          <SiteIcon domain={domain} icons={icons} />
           <div className="min-w-32 flex-1">
             <p className="truncate text-sm font-medium" title={domain}>{domain}</p>
             {badges.length > 0 && (
@@ -200,9 +203,50 @@ function AddSite({ limits }) {
   );
 }
 
+function ExtendMessage() {
+  const [message, setMessage] = useState('');
+  const [saved, setSaved] = useState('');
+
+  useEffect(() => {
+    store.getExtendMessage().then((value) => {
+      setMessage(value);
+      setSaved(value);
+    });
+  }, []);
+
+  const save = async () => {
+    if (message.trim() === saved) return;
+    await store.setExtendMessage(message);
+    setSaved(message.trim());
+    toast.success(message.trim() ? 'Mensagem salva' : 'Mensagem removida');
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Mensagem ao pedir mais tempo</CardTitle>
+        <CardDescription>
+          Aparece na tela de bloqueio ao clicar em "Mais 5 min" ou "Mais 10 min", antes de liberar o tempo.
+          Em branco, o tempo é liberado direto.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Textarea
+          aria-label="Mensagem ao pedir mais tempo"
+          maxLength={280}
+          placeholder="Tem certeza? Você combinou com você mesmo que ia parar por hoje."
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+          onBlur={save}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
 function ClearHistory() {
   const clear = async () => {
-    await chrome.storage.local.remove(['usage', 'extensions', 'warned', 'exceeded']);
+    await chrome.storage.local.remove(['usage', 'extensions', 'warned', 'exceeded', 'siteIcons']);
     toast('Histórico apagado');
   };
 
@@ -228,6 +272,7 @@ function ClearHistory() {
 export function Limits() {
   const [limits, setLimits] = useState(null);
   const sectionRef = useRef(null);
+  const icons = useSiteIcons();
 
   const refresh = () => store.getLimits().then(setLimits);
   useEffect(() => { refresh(); }, []);
@@ -268,10 +313,12 @@ export function Limits() {
         </CardHeader>
         <CardContent>
           {domains.length
-            ? <ul className="divide-y">{domains.map((domain) => <LimitRow key={domain} domain={domain} limit={limits[domain]} />)}</ul>
+            ? <ul className="divide-y">{domains.map((domain) => <LimitRow key={domain} domain={domain} limit={limits[domain]} icons={icons} />)}</ul>
             : <p className="text-sm text-muted-foreground">Nenhum limite cadastrado.</p>}
         </CardContent>
       </Card>
+
+      <ExtendMessage />
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <p>Tudo fica só neste navegador. O histórico com mais de 90 dias é apagado automaticamente.</p>

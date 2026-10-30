@@ -8,16 +8,14 @@ from pathlib import Path
 
 BLACK = (0x0A, 0x0A, 0x0A)
 WHITE = (0xFF, 0xFF, 0xFF)
+AMBER = (0xF5, 0xA5, 0x24)
 
 # Mesmas formas do icon.svg, num quadro de 128 x 128.
 SHAPES = [
-    ("rect", (0, 0, 128, 128, 26), BLACK),
-    ("rect", (30, 18, 68, 11, 5.5), WHITE),
-    ("rect", (30, 99, 68, 11, 5.5), WHITE),
-    ("poly", [(38, 29), (90, 29), (90, 40), (70, 64), (90, 88), (90, 99),
-              (38, 99), (38, 88), (58, 64), (38, 40)], WHITE),
-    ("poly", [(49, 42), (79, 42), (64, 59)], BLACK),
-    ("poly", [(46, 95), (82, 95), (64, 78)], BLACK),
+    ("rect", (0, 0, 128, 128, 28), BLACK),
+    ("line", ([(28, 104), (64, 24), (100, 104)], 13), WHITE),
+    ("poly", [(44, 104), (64, 76), (84, 104)], AMBER),
+    ("line", ([(44, 104), (64, 76), (84, 104), (44, 104)], 5), AMBER),
 ]
 
 
@@ -41,10 +39,23 @@ def in_rect(x, y, rect):
     return (x - cx) ** 2 + (y - cy) ** 2 <= r * r
 
 
+def in_line(x, y, line):
+    """Traço com pontas e cantos arredondados, como stroke-linecap: round."""
+    points, width = line
+    for (ax, ay), (bx, by) in zip(points, points[1:]):
+        dx, dy = bx - ax, by - ay
+        t = max(0, min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)))
+        if (x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2 <= (width / 2) ** 2:
+            return True
+    return False
+
+
+HIT_TESTS = {"rect": in_rect, "poly": in_poly, "line": in_line}
+
+
 def color_at(x, y):
     for kind, geometry, color in reversed(SHAPES):
-        hit = in_rect(x, y, geometry) if kind == "rect" else in_poly(x, y, geometry)
-        if hit:
+        if HIT_TESTS[kind](x, y, geometry):
             return color
     return None
 

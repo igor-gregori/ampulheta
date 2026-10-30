@@ -12,6 +12,12 @@ mock.timers.enable({ apis: ['Date'], now: START.getTime() });
 const chrome = createFakeChrome();
 globalThis.chrome = chrome;
 
+// O _favicon do Chrome: um ícone por página e um globo para o que não conhece.
+const favicons = { 'https://www.youtube.com/watch?v=abc': 'yt', 'https://github.com/igor': 'gh' };
+globalThis.fetch = async (url) => new Response(favicons[new URL(url).searchParams.get('pageUrl')] ?? 'globo', {
+  headers: { 'content-type': 'image/png' },
+});
+
 const store = await import('../shared/storage.js');
 await import('../background.js');
 
@@ -49,6 +55,27 @@ test('conta o tempo da aba ativa e agrupa www. no domínio', async () => {
   advance(30);
   await tick();
   assert.equal(usageToday()['youtube.com'], 30);
+});
+
+test('selo mostra o tempo no site, por aba', async () => {
+  assert.equal(chrome.env.badges.get(1).text, '0m');
+  assert.equal(store.formatBadge(38 * 60 + 59), '38m');
+  assert.equal(store.formatBadge(65 * 60), '1:05');
+  assert.equal(store.formatBadge(125 * 60), '2:05');
+});
+
+test('guarda o ícone do site e ignora o globo genérico', async () => {
+  const icons = chrome.storage.local.items().siteIcons;
+  assert.equal(icons['youtube.com'], `data:image/png;base64,${btoa('yt')}`);
+
+  chrome.env.tabs[0].url = 'https://sem-icone.com/';
+  await chrome.tabs.onUpdated.fire(1, { url: chrome.env.tabs[0].url }, chrome.env.tabs[0]);
+  await settle();
+  assert.equal('sem-icone.com' in chrome.storage.local.items().siteIcons, false);
+
+  chrome.env.tabs[0].url = 'https://www.youtube.com/watch?v=abc';
+  await chrome.tabs.onUpdated.fire(1, { url: chrome.env.tabs[0].url }, chrome.env.tabs[0]);
+  await settle();
 });
 
 test('m.youtube.com conta como youtube.com', async () => {
@@ -128,6 +155,8 @@ test('aviso de 5 minutos é enviado uma vez', async () => {
   assert.match(warnings[0].title, /Faltam 5 min/);
   const limitAlarm = chrome.env.alarms.get('limit-check');
   assert.ok(limitAlarm, 'agenda verificação para o momento do bloqueio');
+  assert.equal(chrome.env.badges.get(1).text, '55m');
+  assert.equal(chrome.env.badges.get(1).color, '#D97706', 'selo muda de cor perto do limite');
 });
 
 test('bloqueia ao estourar o limite', async () => {
@@ -163,6 +192,25 @@ test('"mais 5 min" funciona uma vez por dia', async () => {
   await run(5 * 60 + 5);
   await settle();
   assert.match(chrome.env.tabs[0].url, /blocked\.html/);
+});
+
+test('"mais 10 min" soma 10 minutos e também vale uma vez por dia', async () => {
+  const day = '2026-10-23';
+  await store.markExtension('reddit.com', 10, day);
+  await store.setLimit('reddit.com', 30);
+  assert.equal(await store.allowanceSeconds('reddit.com', day), 40 * 60);
+  assert.equal(await store.hasExtension('reddit.com', day), true);
+
+  assert.deepEqual(await chrome.send({ type: 'extend', site: 'x.com', minutes: 10 }), { ok: true });
+  assert.equal(chrome.storage.local.items().extensions[store.dayKey()]['x.com'], 10);
+  assert.deepEqual(await chrome.send({ type: 'extend', site: 'x.com', minutes: 5 }), { ok: false, reason: 'used' });
+
+  // Valor fora das opções cai nos 5 minutos.
+  await chrome.send({ type: 'extend', site: 'y.com', minutes: 999 });
+  assert.equal(chrome.storage.local.items().extensions[store.dayKey()]['y.com'], 5);
+
+  assert.equal(store.extensionSeconds(true), 5 * 60, 'registro antigo vale 5 min');
+  await store.removeLimit('reddit.com');
 });
 
 test('status devolve o que está contando agora', async () => {
@@ -217,6 +265,12 @@ test('limpeza apaga dados com mais de 90 dias', async () => {
   const after = chrome.storage.local.items().usage;
   assert.equal(after['2026-06-01'], undefined);
   assert.ok(after['2026-07-30']);
+});
+
+test('limpeza tira os ícones de sites que saíram do histórico', async () => {
+  await chrome.storage.local.set({ siteIcons: { 'youtube.com': 'a', 'old.com': 'b' } });
+  await store.pruneOldData(new Date(2026, 9, 22));
+  assert.deepEqual(Object.keys(chrome.storage.local.items().siteIcons), ['youtube.com']);
 });
 
 test('normalizeDomain e matchLimitDomain', () => {

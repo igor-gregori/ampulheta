@@ -4,7 +4,14 @@
   "version": "1.0.0",
   "description": "Limita o tempo em sites escolhidos, com limites por dia da semana, e mostra um resumo semanal todo sábado.",
   "homepage_url": "https://github.com/igor-gregori/ampulheta",
-  "permissions": ["tabs", "storage", "idle", "alarms", "notifications"],
+  "permissions": [
+    "tabs",
+    "storage",
+    "idle",
+    "alarms",
+    "notifications",
+    "favicon"
+  ],
   "background": {
     "service_worker": "background.js",
     "type": "module"
