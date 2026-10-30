@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Ampulheta",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Limita o tempo em sites escolhidos, com limites por dia da semana, e mostra um resumo semanal todo sábado.",
   "homepage_url": "https://github.com/igor-gregori/ampulheta",
   "permissions": [

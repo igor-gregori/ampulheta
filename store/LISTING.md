@@ -1,10 +1,10 @@
 # Chrome Web Store: textos e respostas
 
-Tudo o que o painel do desenvolvedor pede, na ordem das abas. É só copiar e colar.
+Tudo o que o painel do desenvolvedor pede, na ordem das abas. É só copiar e colar. Em uma atualização, troque só o que mudou.
 
 ## Pacote
 
-Envie `dist/ampulheta-<versão>.zip` (gerado por `npm run package`).
+Envie `dist/ampulheta-<versão>.zip` (gerado por `npm run package`). O número da versão precisa ser maior que o da última enviada.
 
 ## Página na loja
 

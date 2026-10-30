@@ -26,7 +26,7 @@ Tudo fica no seu navegador (`chrome.storage.local`). Não há servidor, conta ou
 
 ### Pela Chrome Web Store
 
-Em breve.
+Procure por **Ampulheta** na Chrome Web Store.
 
 ### Sem compactação (desenvolvimento)
 
@@ -76,9 +76,11 @@ As telas usam React, Tailwind CSS e shadcn/ui, com build pelo Vite. O `backgroun
 
 ## Publicar uma nova versão
 
-1. Aumente `version` em `public/manifest.json`.
+1. Aumente `version` em `public/manifest.json` e registre a mudança no [`CHANGELOG.md`](CHANGELOG.md). A loja só aceita um número maior que o da última versão enviada.
 2. Gere o pacote com `npm run package`. Ele faz o build e o arquivo sai em `dist/ampulheta-<versão>.zip`, só com os arquivos da extensão.
-3. No [painel do desenvolvedor](https://chrome.google.com/webstore/devconsole), abra a Ampulheta, envie o novo pacote em *Pacote* e clique em *Enviar para revisão*.
+3. No [painel do desenvolvedor](https://chrome.google.com/webstore/devconsole), abra a Ampulheta, envie o novo pacote em *Pacote*, atualize os textos e as imagens que mudaram e clique em *Enviar para revisão*.
+
+Se a versão pedir uma permissão nova, justifique em *Privacidade*. Uma permissão com aviso novo desativa a extensão para quem já usa até a pessoa aceitar. A `favicon`, adicionada na 1.1.0, não deve causar isso: pela documentação do Chrome, ela não mostra aviso junto com `tabs`.
 
 Os textos da página da loja estão em [`store/LISTING.md`](store/LISTING.md).
 
